@@ -14,7 +14,8 @@ const Balance = () => {
   return (
     
     <div className="balance-container">
-      <h1 className={total.amount < 0 ? 'minus': 'plus'}>{ sign }₦{total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</h1>
+      <h1 className={total < 0 ? "minus":"plus"}>
+        {sign}₦{Math.abs(total).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</h1>
       <h4>Balance</h4>
     </div>
   )
