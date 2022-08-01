@@ -1,8 +1,20 @@
+import { useContext } from "react"
+import { GlobalContext } from "../context/GlobalState"
 
 const Balance = () => {
+  const { transactions } = useContext(GlobalContext)
+  
+  // To get the Balance
+  const amounts = transactions.map(transaction => transaction.amount)
+  const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2)
+
+  const sign = total < 0 ? '-' : ''
+  
+  
   return (
+    
     <div className="balance-container">
-      <h1>₦0.00</h1>
+      <h1 className={total.amount < 0 ? 'minus': 'plus'}>{ sign }₦{total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</h1>
       <h4>Balance</h4>
     </div>
   )

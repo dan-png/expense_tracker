@@ -29,6 +29,14 @@ h1 {
   margin: 0;
 }
 
+.plus {
+  color: #2ecc71;
+}
+
+.minus {
+  color: #c0392b;
+}
+
 h3 {
   border-bottom: 1px solid #bbb;
   padding-bottom: 10px;
