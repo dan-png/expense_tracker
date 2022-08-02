@@ -1,41 +1,124 @@
-import { createContext, useReducer } from "react";
+import { createContext, useCallback, useEffect, useReducer, useState } from "react";
 import { AppReducer } from './AppReducer'
+import { addDoc, collection, deleteDoc, doc, Timestamp, onSnapshot } from "firebase/firestore"
+import { db } from '../firebase/config'
+
+
+
+
+
+
 
 
 // Initial State
 const initialState = {
-  transactions: [
-    { id: 1, text: 'Flower', amount: -20 },
-    { id: 2, text: 'Salary', amount: 30000 },
-    { id: 3, text: 'Food', amount: -1000 },
-    { id: 4, text: 'Book', amount: -2500 },
-  ]
+  transactions: [],
+  loading: true
+
 }
 
 // Create context
-export const GlobalContext = createContext(initialState)
+export const GlobalContext = createContext()
 
 // Provider component
 export const GlobalProvider = ({ children }) => {
+
+
   const [state, dispatch] = useReducer(AppReducer, initialState)
+  const [isCancelled, setIsCancelled] = useState(false)
+
+
+
+
+
+
+
+  // Collection Ref
+  const ref = collection(db, 'transactions')
+
+  // When dispatch is not cancelled
+  const dispatchIfNotCancelled = useCallback((action) => {
+    if (!isCancelled) {
+      dispatch(action)
+    }
+  }, [isCancelled])
 
   // Actions
-  function deleteTransaction(id) {
-    dispatch({
-      type: 'DELETE_TRANSACTION',
-      payload: id
+
+
+
+  const getTransaction = useCallback(() => {
+    const unsub = onSnapshot(ref, (snapshot) => {
+      let transactions = []
+      snapshot.docs.forEach((doc) => {
+        transactions.push({ ...doc.data(), id: doc.id })
+
+      })
+
+      dispatchIfNotCancelled({
+        type: 'FETCH_TRANSACTION',
+        payload: transactions
+      })
+
+
+
+    }, (error) => {
+      console.log(error)
+
     })
+
+    return () => unsub()
+  }, [dispatchIfNotCancelled, ref])
+
+
+
+  useEffect(() => {
+    getTransaction()
+  }, [getTransaction])
+
+
+
+
+  const deleteTransaction = async (id) => {
+    // dispatch({
+    //   type: 'DELETE_TRANSACTION',
+    //   payload: id
+    // })
+
+    try {
+      await deleteDoc(doc(db, 'transactions', id))
+      dispatchIfNotCancelled({
+        type: 'DELETE_TRANSACTION',
+        payload: id
+      })
+    } catch (error) {
+
+    }
   }
 
-  function addTransaction(transaction) {
-    dispatch({
-      type: 'ADD_TRANSACTION',
-      payload: transaction
-    })
+  // Add transaction
+  const addTransaction = async (transaction) => {
+    // dispatch({
+    //   type: 'ADD_TRANSACTION',
+    //   payload: transaction
+    // })
+    try {
+      const createdAt = Timestamp.fromDate(new Date())
+      const addedTransaction = await addDoc(ref, { ...transaction, createdAt })
+      dispatchIfNotCancelled({ type: 'ADD_TRANSACTION', payload: addedTransaction })
+    } catch (error) {
+      console.log(error)
+    }
   }
+
+  // Clean up function
+  useEffect(() => {
+    return () => setIsCancelled(true)
+  })
 
   return (
-    <GlobalContext.Provider value={{ transactions: state.transactions, deleteTransaction, addTransaction }}>
+    <GlobalContext.Provider value={{ transactions: state.transactions, loading: state.loading, deleteTransaction, addTransaction }}>
+
       {children}
     </GlobalContext.Provider>)
 }

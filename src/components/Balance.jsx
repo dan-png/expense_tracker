@@ -1,8 +1,13 @@
 import { useContext } from "react"
 import { GlobalContext } from "../context/GlobalState"
+import Spinner from "./Spinner"
+
 
 const Balance = () => {
-  const { transactions } = useContext(GlobalContext)
+
+  const { transactions, loading } = useContext(GlobalContext)
+
+
   
   // To get the Balance
   const amounts = transactions.map(transaction => transaction.amount)
@@ -11,7 +16,7 @@ const Balance = () => {
   const sign = total < 0 ? '-' : ''
   
   
-  return (
+  return loading ? <Spinner/> :(
     
     <div className="balance-container">
       <h1 className={total < 0 ? "minus":"plus"}>
