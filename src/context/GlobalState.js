@@ -13,7 +13,7 @@ import { db } from '../firebase/config'
 // Initial State
 const initialState = {
   transactions: [],
-  loading: true
+  loading: false
 
 }
 
@@ -47,6 +47,7 @@ export const GlobalProvider = ({ children }) => {
 
 
 
+  // get Transaction from Firebase
   const getTransaction = useCallback(() => {
     const unsub = onSnapshot(ref, (snapshot) => {
       let transactions = []
@@ -78,7 +79,7 @@ export const GlobalProvider = ({ children }) => {
 
 
 
-
+  // delete transaction
   const deleteTransaction = async (id) => {
     // dispatch({
     //   type: 'DELETE_TRANSACTION',

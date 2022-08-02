@@ -14,7 +14,11 @@ const Balance = () => {
   const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2)
 
   const sign = total < 0 ? '-' : ''
-  
+  if (!loading && (!transactions || transactions.length === 0)) {
+    return <h3>
+      No Transactions yet
+    </h3>
+  }
   
   return loading ? <Spinner/> :(
     
